@@ -1,0 +1,47 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/1/Or8Way.hdl
+/**
+ * 8-way Or gate: 
+ * out = in[0] Or in[1] Or ... Or in[7]
+ */
+CHIP Or8Way {
+    IN in[8];
+    OUT out;
+
+    PARTS:
+    //// Apply Not Gate to each Input 
+    Nand(a= in[0], b=in[0] , out=In0Not);
+    Nand(a= in[1], b=in[1] , out=In1Not);
+    Nand(a= in[2], b=in[2] , out=In2Not);
+    Nand(a= in[3], b=in[3] , out=In3Not);    
+    Nand(a= in[4], b=in[4] , out=In4Not);
+    Nand(a= in[5], b=in[5] , out=In5Not);
+    Nand(a= in[6], b=in[6] , out=In6Not);
+    Nand(a= in[7], b=in[7] , out=In7Not);
+
+    // Combine
+    Nand(a= In0Not, b= In1Not, out= phase01);
+    Nand(a=In2Not, b= In3Not, out= phase02);
+    Nand(a=In4Not, b= In5Not, out= phase03);
+    Nand(a=In6Not, b= In7Not, out= phase04);
+
+    // Apply Not Gate     
+    Nand(a= phase01, b= phase01, out= phase11);
+    Nand(a= phase02, b= phase02, out= phase12);
+    Nand(a= phase03, b= phase03, out= phase13);
+    Nand(a= phase04, b= phase04, out= phase14);
+                
+    // Combine 
+    Nand(a= phase11, b= phase12, out= phase21); 
+    Nand(a= phase13, b= phase14, out= phase22); 
+
+    // Apply Not Gate 
+    Nand(a= phase21, b= phase21 , out=phase31);
+    Nand(a= phase22, b= phase22, out= phase32);  
+
+    // Result 
+    Nand(a=phase31, b=phase32 , out=out); 
+    
+    }
