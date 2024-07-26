@@ -1,0 +1,17 @@
+/**
+ * Full adder. Computes the sum of three bits.
+ * sum = a XOR b XOR c
+ * carry = (a AND b) OR (c AND (a XOR b))
+ */
+CHIP FullAdder {
+    IN a, b, c;
+    OUT sum, carry;
+
+    PARTS:
+    // First half adder
+    HalfAdder(a=a, b=b, sum=abSum, carry=abCarry);
+    // Second half adder
+    HalfAdder(a=abSum, b=c, sum=sum, carry=abcCarry);
+    // Carry-out logic
+    Or(a=abCarry, b=abcCarry, out=carry);
+}
