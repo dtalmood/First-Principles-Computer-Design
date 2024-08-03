@@ -1,0 +1,28 @@
+
+
+CHIP PC {
+    IN in[16], reset, load, inc;
+    OUT out[16];
+    
+    PARTS:
+    // Register to hold the current value
+    // `Register` has input `in`, control signal `load`, and output `out`
+    // Adder to increment the current value by 1
+    // `Add16` has inputs `a` and `b` (where `b` is the increment value), and output `out`
+    Inc16(in=currentValue , out=currentInc);
+    
+    // Mux to choose between the incremented value or the current value
+    // `Mux16` has inputs `a`, `b`, and control signal `sel`, output `out`
+    Mux16(a=currentValue, b=currentInc, sel=inc, out=incTest);
+    
+    // Mux to choose between the incremented/current value or the load input
+    Mux16(a=incTest, b=in, sel=load, out= loadTest);
+    
+    // Mux to handle the reset condition
+    // `b=false` means resetting to zero
+    Mux16(a=loadTest, b=false, sel=reset, out=nextValue);
+    
+    // Output the final value
+    // `nextValue` is the value to be output
+    Register(in=nextValue, load=true, out=out, out=currentValue);
+}
