@@ -33,4 +33,72 @@ CHIP CPU {
 
     PARTS:
 	//// Replace this comment with your code.
+
+    // determine if we have A or C instruction 
+    Not(in=instruction[15], out=aInst);
+    Not(in= aInst, out= cInst);
+
+
+    // Determine if we have a C-instruction and if should write to destination Register A 
+    And(a= cInst, b=instruction[5] , out= aluOutToA);    
+    // If sel = 0 then A out = instruction, if sel = 1 then aluOut = aluResult
+    Mux16(a=instruction , b=aluResult , sel= aluOutToA, out= aOut);
+
+    // Load A register, if we either have A instruction or C instruction we store to A regsiter  
+    Or(a= aInst, b= aluOutToA, out= loadA);
+    // Now we looad info into our A regstiter 
+    ARegister(in=aOut , load= loadA, out= aReg);
+
+    // Now determien if we load A reg or inM in ALU 
+    Mux16(a= aReg, b= inM, sel=instruction[12] , out= aRegOrInM);
+
+    // Determine if we load D reg with ALU result 
+    And(a=cInst, b=instruction[4], out=loadD);
+    DRegister(in=aluResult, load=loadD, out=dReg);    // load the D register from ALU
+
+    // Feed Input into our ALU 
+    ALU(x=dReg , y=aRegOrInM , zx= instruction[11] 
+                             , nx= instruction[10]
+                             , zy= instruction[9]
+                             , ny= instruction[8]
+                             , f=  instruction[7]
+                             , no= instruction[6], 
+                             out= aluResult, 
+                             zr= zr, 
+                             ng= ng);
+    
+    // Update WriteM
+    And(a = cInst, b = instruction[3], out =writeM );
+    // Update addressM
+    Or16(a= false, b= aReg, out[0..14]= addressM);
+    // OutM
+    Or16(a=false , b= aluResult, out=outM );
+
+
+    // Determine Jump
+    Not(in=zr , out= zrNot);
+    Not(in=ng , out= ngNot);
+
+    //  alu = 0 
+    And(a= zr, b= instruction[1], out= JEQ); 
+    
+    // alu < 0 
+    And(a= ng, b= instruction[2], out= JLE);    
+
+    // alu > 0
+    And(a= zr, b= instruction[0], out= JGT); 
+
+    // ( JEQ or JLE or JGT) 
+    Or(a= JEQ, b= JLE, out= result);
+    Or(a= result, b= JGT, out= jumpToA);
+
+    // only Jump if we have a C-instruction
+    And(a= cInst, b= jumpToA, out= jumpResult);
+    // Not If Jump Result = True then Increase = false 
+    // and If Jump Result = false then increase = true 
+    Not(in= jumpResult, out= jumpInc);
+
+    PC(in=aReg , load=jumpResult , inc=jumpInc , reset=reset , out[0..14]=pc);
+
+
 }
