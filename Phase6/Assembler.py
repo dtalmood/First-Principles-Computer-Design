@@ -22,22 +22,30 @@ def convertDecimalToBinary(value):
         answer += current * (10 ** count)
         count += 1
         value //= 2
-    rest = 15-count+1
+    if(count == 0):
+        rest = 15-count
+    else:   
+        rest = 15-count+1
     final_answer = '0' * rest + str(answer)
     print("Final Answer:", final_answer)
     return final_answer
 
 def AInstruction(mainLine):
     print("A-Instruction")
+    current = mainLine[1:]
 
     # Decimal
     if mainLine[1:2].isnumeric():  
         print("Found Decimal")
-        value = int(mainLine[1:])
+        value = int(current)
         result = convertDecimalToBinary(value)
         return result
     
     # Check if Predefined Symbol 
+    elif current in preDefinedSymbols: 
+        value = preDefinedSymbols[current]
+        result = convertDecimalToBinary(value)
+        return result
 
         
 
@@ -97,6 +105,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
