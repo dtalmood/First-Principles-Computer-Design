@@ -145,7 +145,7 @@ def CInstruction(mainLine):
     if mainLine in compNoA:
         print("a = 0")
         compDec = compNoA[mainLine] # Grab decimal value
-        comp = convertDecimalToBinary(compDec,6) # convert to binary
+        comp = convertDecimalToBinary(compDec,5) # convert to binary
         print("Comp Dec Value = ", comp) 
         comp = '1111' + comp
 
@@ -165,10 +165,10 @@ def CInstruction(mainLine):
 
 def main():
     # Open the .asm file for reading.
-    file1 = open("TestFiles/test.asm", "r")
+    file1 = open("TestFiles/Rect.asm", "r")
     
     # This is the file we are going to be writing to.
-    file2 = open("Output/test.hack", "w+")
+    file2 = open("Output/Rect.hack", "w+")
     
     line = file1.readline()
 
@@ -181,8 +181,15 @@ def main():
         if mainLine == "" or mainLine.startswith("//"):  # Comment or Empty Line 
             line = file1.readline()
             continue  # Skip Rest of code 
+        
+        #Lets remove comments if user typed it to left of the instruction 
+        
+        
+        
         # Determine if A, C or L instruction 
         
+
+
         if mainLine.startswith('@'):  # A-inst
             answer = AInstruction(mainLine)
             file2.write(f"{answer}\n")
