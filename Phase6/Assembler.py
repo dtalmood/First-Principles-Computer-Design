@@ -7,16 +7,17 @@ symbolTable = {
     'R15': 15,    'SCREEN': 16384, 'KBD': 24576
 }
 
-jump = {
+jumpTable = {
     'JGT': 1,      'JEQ': 2,      "JGE": 3,      "JLT": 4,
     'JNE': 5,      'JLE': 6,      "JMP": 7
 }
 
-dest = {
+destTable = {
     'M': 1,      'D': 2,      'DM': 3,       'A': 4,
     'AM':5,      'AD':6,      'ADM': 7      
 }
 
+# a = 0
 compNoA = {
     '0': 42,      '1': 63,      '-1': 58,      'D': 12,
     'A': 48,      '!D': 13,     '!A': 49,      '-D': 15,
@@ -24,7 +25,7 @@ compNoA = {
     'A-1': 50,    'D+A': 2,     'D-A': 19,     'A-D': 7,
     'D&A': 0,     'D|A': 21  
 }
-
+# a = 1
 compWithA = {
     'M': 48,      '!M': 49,      '-M': 51,      'M+1': 55,
     'M-1': 50,    'D+M': 2,      'D-M': 19,     'M-D': 7,
@@ -35,8 +36,8 @@ compWithA = {
 # Global variable to keep track of variable symbol addresses
 valueSymbol = 16
 
+# Value (int), numOfBits (int), Returns String
 def convertDecimalToBinary(value,numOfBits):
-    print("Entered Function")
     count = 0
     current = 0 
     answer = 0
@@ -53,18 +54,17 @@ def convertDecimalToBinary(value,numOfBits):
         rest = numOfBits-count
     else:   
         rest = numOfBits-count+1
+
     final_answer = '0' * rest + str(answer)
-    print("Final Answer:", final_answer)
+    #print("Final Answer:", final_answer)
     return final_answer
 
 def AInstruction(mainLine):
     global valueSymbol  # Ensure we are using the global variable
-    print("A-Instruction")
     current = mainLine[1:]
 
     # Decimal
     if current.isdigit():
-        print("Found Decimal")
         value = int(current)
         result = convertDecimalToBinary(value,15)
         return result
@@ -90,7 +90,6 @@ def AInstruction(mainLine):
 
 
 def LInstruction(mainLine, pc):
-    print("L-Instruction")
     # Remove parentheses from the symbol name
     symbol = mainLine[1:-1]
     symbolTable[symbol] = pc 
@@ -100,14 +99,67 @@ def LInstruction(mainLine, pc):
 def CInstruction(mainLine):
     print("C-Instruction")
 
-    #First Lets Check if we have jump
-    
+    # Initialize current to binary string of jump part
+    current = '000'  # Default jump bits if no jump is found
     semiC = ';'
-    if semiC in mainLine: # Jump 
-        dest = '='
-
-    #else: # No Jump
     
+    # Check if semicolon is present
+    if semiC in mainLine:
+        print("Jump Found")
+        # Extract jump instruction
+        lastThreeChar = mainLine.split(semiC)[-1].strip()  # Get jump part after ';'
+        # Remove everything to the right of the semicolon (including the semicolon itself)
+        mainLine = mainLine.split(semiC)[0].strip()
+        jumpInst = jumpTable.get(lastThreeChar, 0)  # Get corresponding decimal value, default to 0
+        print("Decimal Value of Jump = ",jumpInst)
+        current = convertDecimalToBinary(jumpInst, 2)  # Convert to binary string with 3 bits
+        print("decimal-->Binary(jump) = ", current)
+
+    print("After Checking for Jump, Current = ",current)
+    print("Mainline after removing Jump, Mainline = ",mainLine)
+
+    # Handle Destination
+    equal = '='
+    temp = ''
+    if equal in mainLine:  # Dest Found
+        # Extract the destination part
+        leftSide = mainLine.split(equal)[0].strip()  # Get part before '='
+        # Remove everything to the left of the equal sign (including the equal sign itself)
+        mainLine = mainLine.split(equal, 1)[-1].strip()
+        dInst = destTable.get(leftSide, 0)  # Get corresponding decimal value, default to 0
+        print("Decimal Value of Dest = ",dInst)
+        temp = convertDecimalToBinary(dInst, 2)  # Convert to binary string with 3 bits
+        print("decimal-->Binary(dest) = ", temp)
+
+    else:  # No Dest
+        temp = '000'  # Default destination part as '000'
+
+    # Combine temp and current as binary strings
+    combined_binary = temp + current
+    
+    print("After checking for Destination, Current = ", combined_binary)
+    print("Mainline after removing Dest, Mainline = ",mainLine)
+
+    # Handle Computation
+    comp = ''
+    if mainLine in compNoA:
+        print("a = 0")
+        compDec = compNoA[mainLine] # Grab decimal value
+        comp = convertDecimalToBinary(compDec,6) # convert to binary
+        print("Comp Dec Value = ", comp) 
+        comp = '1111' + comp
+
+    else:
+        print("a = 1")
+        compDec = compWithA[mainLine] # Grab decimal value
+        comp = convertDecimalToBinary(compDec,5) # convert to binary
+        print("Comp Dec Value = ", comp) 
+        comp = '1110' + comp
+
+    finalAnswer = comp + combined_binary
+    print("FINAL RESULT = ", finalAnswer)
+
+    return finalAnswer
 
 
 
@@ -141,7 +193,8 @@ def main():
             file2.write(f"{answer}\n")
         
         else:  # C-Inst
-            CInstruction(mainLine) 
+            answer = CInstruction(mainLine) 
+            file2.write(f"{answer}\n")
 
         # Read the next line
         line = file1.readline()
