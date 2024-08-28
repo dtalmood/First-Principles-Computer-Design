@@ -147,14 +147,14 @@ def CInstruction(mainLine):
         compDec = compNoA[mainLine] # Grab decimal value
         comp = convertDecimalToBinary(compDec,5) # convert to binary
         print("Comp Dec Value = ", comp) 
-        comp = '1111' + comp
+        comp = '1110' + comp
 
     else:
         print("a = 1")
         compDec = compWithA[mainLine] # Grab decimal value
         comp = convertDecimalToBinary(compDec,5) # convert to binary
         print("Comp Dec Value = ", comp) 
-        comp = '1110' + comp
+        comp = '1111' + comp
 
     finalAnswer = comp + combined_binary
     print("FINAL RESULT = ", finalAnswer)
@@ -165,10 +165,10 @@ def CInstruction(mainLine):
 
 def main():
     # Open the .asm file for reading.
-    file1 = open("TestFiles/Rect.asm", "r")
+    file1 = open("TestFiles/Test.asm", "r")
     
     # This is the file we are going to be writing to.
-    file2 = open("Output/Rect.hack", "w+")
+    file2 = open("Output/Test.hack", "w+")
     
     line = file1.readline()
 
