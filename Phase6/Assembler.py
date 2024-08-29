@@ -161,10 +161,10 @@ def CInstruction(mainLine):
 
 def main():
     # Open the .asm file for reading.
-    file1 = open("TestFiles/Max.asm", "r")
+    file1 = open("TestFiles/Rect.asm", "r")
     
     # This is the file we are going to be writing to.
-    file2 = open("Output/Max.hack", "w+")
+    file2 = open("Output/Rect.hack", "w+")
     
     line = file1.readline()
 
