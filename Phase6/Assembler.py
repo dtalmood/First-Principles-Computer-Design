@@ -93,8 +93,6 @@ def LInstruction(mainLine, pc):
     # Remove parentheses from the symbol name
     symbol = mainLine[1:-1]
     symbolTable[symbol] = pc 
-    result = convertDecimalToBinary(pc,15) 
-    return result
 
 def CInstruction(mainLine):
     print("C-Instruction")
@@ -161,56 +159,60 @@ def CInstruction(mainLine):
 
     return finalAnswer
 
-
-
 def main():
     # Open the .asm file for reading.
-    file1 = open("TestFiles/Test.asm", "r")
+    file1 = open("TestFiles/Max.asm", "r")
     
     # This is the file we are going to be writing to.
-    file2 = open("Output/Test.hack", "w+")
+    file2 = open("Output/Max.hack", "w+")
     
     line = file1.readline()
 
     pc = 0
 
-    # Loop through file1 line by line
+    # First pass to resolve all labels (L-instructions)
     while line:
         mainLine = line.strip()  # Remove leading/trailing whitespace 
         
         if mainLine == "" or mainLine.startswith("//"):  # Comment or Empty Line 
             line = file1.readline()
-            continue  # Skip Rest of code 
+            continue  # Skip rest of code 
         
-        #Lets remove comments if user typed it to left of the instruction 
+        if mainLine.startswith('(') and mainLine[-1] == ")":  # L-instruction
+            LInstruction(mainLine, pc)
+        else:
+            pc += 1
         
-        
-        
-        # Determine if A, C or L instruction 
-        
+        line = file1.readline()
+    
+    # Reset file pointer for second pass
+    file1.seek(0)
+    pc = 0
 
-
-        if mainLine.startswith('@'):  # A-inst
+    # Second pass to translate A and C instructions
+    line = file1.readline()
+    while line:
+        mainLine = line.strip()
+        
+        if mainLine == "" or mainLine.startswith("//") or (mainLine.startswith('(') and mainLine[-1] == ")"):
+            line = file1.readline()
+            continue
+        
+        if mainLine.startswith('@'):  # A-instruction
             answer = AInstruction(mainLine)
             file2.write(f"{answer}\n")
-
-
-        elif mainLine.startswith('(') and mainLine[-1] == ")":  #L-Inst        
-            answer = LInstruction(mainLine, pc)
-            file2.write(f"{answer}\n")
         
-        else:  # C-Inst
+        else:  # C-instruction
             answer = CInstruction(mainLine) 
             file2.write(f"{answer}\n")
-
-        # Read the next line
+        
         line = file1.readline()
-        #increment our program counter
         pc += 1
 
     # Close the files after the operation
     file1.close()
     file2.close()
+
 
 if __name__ == "__main__":
     main()
